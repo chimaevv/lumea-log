@@ -85,8 +85,13 @@ export default function DashboardPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
 
+ 
+
   useEffect(() => {
-    if (!loading && !user) router.push("/login");
+    // only redirect *after* we've finished checking
+    if (!loading && !user) {
+      router.push("/login");
+    }
   }, [loading, user, router]);
 
   if (loading) {
@@ -96,7 +101,6 @@ export default function DashboardPage() {
       </div>
     );
   }
-
   return (
     <main className="p-8 bg-[url('/lumeabackground.png')] bg-cover min-h-screen">
       <div className="max-w-7xl mx-auto space-y-12">

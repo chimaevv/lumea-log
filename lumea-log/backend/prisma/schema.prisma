@@ -35,6 +35,7 @@ model Follow {
 
 model Drama {
   id          String    @id @default(uuid())
+  tmdbId      Int?      @unique
   title       String
   description String?   // Optional description
   posterUrl   String?   // Optional URL to the drama poster image

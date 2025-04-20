@@ -1,23 +1,14 @@
-// src/context/AuthContext.tsx
 "use client";
-
 import React, {
   createContext,
-  useContext,
-  useEffect,
   useState,
+  useEffect,
+  useContext,
   ReactNode,
 } from "react";
 
-type User = {
-  id: string;
-  username: string;
-  email: string;
-  profilePic?: string;
-};
-
 interface AuthContextType {
-  user: User | null;
+  user: { id: string; username: string; email: string } | null;
   loading: boolean;
 }
 
@@ -27,31 +18,25 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AuthContextType["user"]>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (!token) {
+    if (token) {
+      fetch("http://localhost:4000/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then((res) => {
+          if (!res.ok) throw new Error("not logged in");
+          return res.json();
+        })
+        .then((u) => setUser(u))
+        .catch(() => setUser(null))
+        .finally(() => setLoading(false));
+    } else {
       setLoading(false);
-      return;
     }
-
-    fetch("http://localhost:4000/me", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(async (res) => {
-        if (!res.ok) throw new Error("Not authenticated");
-        const u = await res.json();
-        setUser(u);
-      })
-      .catch(() => {
-        localStorage.removeItem("token");
-        setUser(null);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
   }, []);
 
   return (
